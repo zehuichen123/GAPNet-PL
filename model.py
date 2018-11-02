@@ -157,7 +157,7 @@ class GAPNetModel():
             prediction.append(str_label.strip())
     
         submit['Predicted'] = np.array(prediction)
-        submit.to_csv('4channels_cnn_from_scratch.csv', index=False)
+        submit.to_csv('predict.csv', index=False)
 
     def get_best_model(self):
         return load_model(self.opts['save_model_path'], custom_objects={'f1':f1})  
