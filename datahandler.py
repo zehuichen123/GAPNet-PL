@@ -45,9 +45,9 @@ def getTestDataset(opts):
     return np.array(paths), np.array(labels)
 
 def get_train_test_generator(opts):
-    random_seed = configs.data_opts['random_seed']
-    val_ratio = configs.data_opts['val_ratio']
-    batch_size = configs.model_opts['batch_size']
+    random_seed = opts['random_seed']
+    val_ratio = opts['val_ratio']
+    batch_size = opts['batch_size']
 
     paths, labels = getTrainDataset(opts)
     # divide to 
@@ -70,12 +70,13 @@ def get_train_test_generator(opts):
 
 class ProteinDataGenerator(Sequence):
     def __init__(self, opts, paths, labels, batch_size, shape, shuffle=False,\
-            use_cache = False, augment = False):
+            use_cache = False, augment = True):
         self.opts = opts
         self.paths, self.labels = paths, labels
         self.batch_size = batch_size
         self.shape = shape
         self.shuffle = shuffle
+        self.augment = augment
         self.use_cache = use_cache
         if use_cache == True:
             self.cache = np.zeros((paths.shape[0], shape[0], shape[1], shape[2]), dtype=np.float16)
@@ -138,8 +139,9 @@ class ProteinDataGenerator(Sequence):
                 ])
             ], random_order=True)
         
-        X = np.concatenate((X, seq.augment_images(X), seq.augment_images(X), seq.augment_images(X)), axis=0)
-        y = np.concatenate((y, y, y, y), axis=0)
+            X = np.concatenate((X, seq.augment_images(X), seq.augment_images(X), seq.augment_images(X)), axis=0)
+            y = np.concatenate((y, y, y, y), axis=0)
+        return X, y
 
     def on_epoch_end(self):
         self.indexes = np.arange(len(self.paths))

@@ -8,7 +8,7 @@ from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint
 from loss import f1_loss, f1
 import numpy as np
-import tqdm
+from tqdm import tqdm
 import pandas as pd
 from sklearn.metrics import f1_score as off1
 from datahandler import get_train_test_generator, ProteinDataGenerator, getTestDataset, getTrainDataset
@@ -68,6 +68,7 @@ class GAPNetModel():
         x = Activation('sigmoid')(x)
         
         self.model = Model(init, x)
+        self.model.compile(loss='binary_crossentropy', optimizer=Adam(lr=1e-4), metrics=['accuracy', f1])
 
     def run(self, epochs=30, use_multiprocessing=False, workers=1, verbose=1):
         save_model_path = self.opts['save_model_path']
@@ -78,7 +79,7 @@ class GAPNetModel():
         reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1, model='min')
         hist = self.model.fit_generator(
             self.train_gen,
-            setps_per_epoch=len(self.train_gen),
+            steps_per_epoch=len(self.train_gen),
             validation_data=self.val_gen,
             validation_steps=8,
             epochs=epochs,
@@ -103,7 +104,7 @@ class GAPNetModel():
         self.model.compile(loss=f1_loss, optimizer=Adam(lr=1e-4), metrics=['accuracy', f1])
         hist = self.model.fit_generator(
             self.train_gen,
-            setps_per_epoch=len(self.train_gen),
+            steps_per_epoch=len(self.train_gen),
             validation_data=self.val_gen,
             validation_steps=8,
             epochs=epochs,
